@@ -5,7 +5,8 @@ void DDALine(GLint, GLint, GLint, GLint);
 void BresenhamLine(GLint, GLint, GLint, GLint);
 void MPCircle(GLint, GLint, GLint);
 void MPEllipse(GLint, GLint, GLint, GLint);
-
+struct ColorRGB;
+void BoundaryFill(const ColorRGB&, const ColorRGB&, GLint, GLint);
 
 class Point2D
 {
@@ -17,4 +18,9 @@ public:
 	GLint getY() { return m_y; }
 	void incrementX() { m_x++; }
 	void decrementY() { m_y--; }
+};
+
+struct ColorRGB
+{
+	GLfloat r, g, b;
 };

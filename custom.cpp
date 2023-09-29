@@ -1,7 +1,7 @@
 #include<glut.h>
 #include<algorithm>
 #include "custom.h"
-
+#include<iostream>
 // The DDA Line Algorithm
 void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 {
@@ -24,6 +24,7 @@ void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 	glEnd();
 }
 
+// Bresenham Line Algorithm
 void BresenhamLine(GLint x0, GLint y0, GLint x1, GLint y1)
 {
 	GLint dy{ abs(y1 - y0) };
@@ -104,8 +105,9 @@ void circPlotPoints(GLint xc, GLint yc, Point2D point)
 	glEnd();
 }
 
-inline GLint round(const float a) { return static_cast<GLint> (a + 0.5); }
+//inline GLint round(const float a) { return static_cast<GLint> (a + 0.5); }
 
+// Midpoint Ellipse Algorithm
 void MPEllipse(GLint rx, GLint ry, GLint xc, GLint yc)
 {
 	GLint x{ 0 };
@@ -171,4 +173,49 @@ void ellipsePlotPoints(GLint xc, GLint yc, GLint x, GLint y)
 	glVertex2i(xc + x, yc - y);
 	glVertex2i(xc - x, yc - y);
 	glEnd();
+}
+
+void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLint x, GLint y)
+{
+	if (x < 0 || y < 0 || x > 600 || y > 500)
+	{
+		return;
+	}
+	GLfloat* pixel{ new GLfloat[4] };
+	glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixel);
+
+	/*for (auto color : *pixel)
+	{
+		std::cout << color << "\n";
+	}*/
+	if ((
+		pixel[0] == fillColor.r &&
+		pixel[1] == fillColor.g &&
+		pixel[2] == fillColor.b
+		) || (
+			pixel[0] == boundaryColor.r &&
+			pixel[1] == boundaryColor.g &&
+			pixel[2] == boundaryColor.b
+			)
+		)
+
+	{
+		delete[] pixel;
+		pixel = nullptr;
+		return;
+	}
+	else
+	{
+		glColor3f(fillColor.r, fillColor.g, fillColor.b);
+		glBegin(GL_POINTS);
+		glVertex2i(x, y);
+		glEnd();
+		BoundaryFill(fillColor, boundaryColor, x - 1, y);
+		BoundaryFill(fillColor, boundaryColor, x + 1, y);
+		BoundaryFill(fillColor, boundaryColor, x, y + 1);
+		BoundaryFill(fillColor, boundaryColor, x, y - 1);
+
+		delete[] pixel;
+		pixel = nullptr;
+	}
 }

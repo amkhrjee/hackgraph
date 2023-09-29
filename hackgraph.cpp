@@ -120,6 +120,45 @@ void displayCustom()
 	glFlush();
 }
 
+void boundaryFillAssignment()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(0.0, 1.0, 0.0);
+	// Face
+	MPCircle(300, 250, 200);
+	// Left Eye
+	//glColor3f(0.5, 0.0, 0.5);
+
+	glBegin(GL_POLYGON);
+	glVertex2i(200, 300);
+	glVertex2i(250, 300);
+	glVertex2i(250, 350);
+	glVertex2i(200, 350);
+	glEnd();
+	// Right Eye
+	glBegin(GL_POLYGON);
+	glVertex2i(350, 300);
+	glVertex2i(400, 300);
+	glVertex2i(400, 350);
+	glVertex2i(350, 350);
+	glEnd();
+	// Nose
+	glBegin(GL_POLYGON);
+	glVertex2i(300, 240);
+	glVertex2i(320, 200);
+	glVertex2i(280, 200);
+	glEnd();
+	// Mouth
+	glRecti(250, 120, 350, 140);
+
+	glFlush();
+	// Performing Boundary Fill
+	ColorRGB boundaryColor{ 0.0, 1.0, 0.0 };
+	ColorRGB fillColor{ 1.0, 0.0, 0.0 };
+	BoundaryFill(fillColor, boundaryColor, 300, 250);
+	glFlush();
+}
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
@@ -133,12 +172,11 @@ int main(int argc, char** argv)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	init();
-	glutDisplayFunc(displayCustom);
+	glutDisplayFunc(boundaryFillAssignment);
 	glutReshapeFunc([](GLint newWidth, GLint newHeight) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluOrtho2D(0.0, newWidth, 0.0, newHeight);
-
 		glClear(GL_COLOR_BUFFER_BIT);
 		});
 	glutMainLoop();
