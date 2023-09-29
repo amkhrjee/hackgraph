@@ -7,6 +7,7 @@ void MPCircle(GLint, GLint, GLint);
 void MPEllipse(GLint, GLint, GLint, GLint);
 struct ColorRGB;
 void BoundaryFill(const ColorRGB&, const ColorRGB&, GLint, GLint);
+void BoundaryFillRemaining(const ColorRGB&, const ColorRGB&, GLint, GLint);
 
 class Point2D
 {

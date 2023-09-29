@@ -2,6 +2,7 @@
 #include<algorithm>
 #include "custom.h"
 #include<iostream>
+#include<thread>
 // The DDA Line Algorithm
 void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 {
@@ -177,11 +178,13 @@ void ellipsePlotPoints(GLint xc, GLint yc, GLint x, GLint y)
 
 void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLint x, GLint y)
 {
+	std::cout << "(" << x << ", " << y << ")" << '\n';
 	if (x < 0 || y < 0 || x > 600 || y > 500)
 	{
 		return;
 	}
 	GLfloat* pixel{ new GLfloat[4] };
+	//GLfloat pixel[4]{};
 	glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixel);
 
 	/*for (auto color : *pixel)
@@ -211,11 +214,59 @@ void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLin
 		glVertex2i(x, y);
 		glEnd();
 		BoundaryFill(fillColor, boundaryColor, x - 1, y);
-		BoundaryFill(fillColor, boundaryColor, x + 1, y);
-		BoundaryFill(fillColor, boundaryColor, x, y + 1);
+		//BoundaryFill(fillColor, boundaryColor, x + 1, y);
 		BoundaryFill(fillColor, boundaryColor, x, y - 1);
+		BoundaryFill(fillColor, boundaryColor, x, y + 1);
 
 		delete[] pixel;
 		pixel = nullptr;
+		return;
+	}
+}
+
+void BoundaryFillRemaining(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLint x, GLint y)
+{
+	std::cout << "Hello from 2" << '\n';
+	if (x < 0 || y < 0 || x > 600 || y > 500)
+	{
+		return;
+	}
+	GLfloat* pixel{ new GLfloat[4] };
+	//GLfloat pixel[4]{};
+	glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixel);
+
+	/*for (auto color : *pixel)
+	{
+		std::cout << color << "\n";
+	}*/
+	if ((
+		pixel[0] == fillColor.r &&
+		pixel[1] == fillColor.g &&
+		pixel[2] == fillColor.b
+		) || (
+			pixel[0] == boundaryColor.r &&
+			pixel[1] == boundaryColor.g &&
+			pixel[2] == boundaryColor.b
+			)
+		)
+
+	{
+		delete[] pixel;
+		pixel = nullptr;
+		return;
+	}
+	else
+	{
+		glColor3f(fillColor.r, fillColor.g, fillColor.b);
+		glBegin(GL_POINTS);
+		glVertex2i(x, y);
+		glEnd();
+		//BoundaryFill(fillColor, boundaryColor, x - 1, y);
+		BoundaryFillRemaining(fillColor, boundaryColor, x + 1, y);
+		BoundaryFillRemaining(fillColor, boundaryColor, x, y - 1);
+		BoundaryFillRemaining(fillColor, boundaryColor, x, y + 1);
+		delete[] pixel;
+		pixel = nullptr;
+		return;
 	}
 }

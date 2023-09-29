@@ -125,10 +125,8 @@ void boundaryFillAssignment()
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(0.0, 1.0, 0.0);
 	// Face
-	MPCircle(300, 250, 200);
-	// Left Eye
-	//glColor3f(0.5, 0.0, 0.5);
-
+	MPCircle(300, 250, 150);
+	//Left Eye
 	glBegin(GL_POLYGON);
 	glVertex2i(200, 300);
 	glVertex2i(250, 300);
@@ -148,14 +146,18 @@ void boundaryFillAssignment()
 	glVertex2i(320, 200);
 	glVertex2i(280, 200);
 	glEnd();
-	// Mouth
+	//Mouth
 	glRecti(250, 120, 350, 140);
 
-	glFlush();
 	// Performing Boundary Fill
 	ColorRGB boundaryColor{ 0.0, 1.0, 0.0 };
-	ColorRGB fillColor{ 1.0, 0.0, 0.0 };
-	BoundaryFill(fillColor, boundaryColor, 300, 250);
+	ColorRGB fillColor{ 0.6, 0.6, 0.6 };
+	BoundaryFillRemaining(fillColor, boundaryColor, 300, 250);
+	BoundaryFill(fillColor, boundaryColor, 299, 250);
+	BoundaryFillRemaining(fillColor, boundaryColor, 300, 180);
+	BoundaryFill(fillColor, boundaryColor, 299, 180);
+	BoundaryFillRemaining(fillColor, boundaryColor, 300, 119);
+	BoundaryFill(fillColor, boundaryColor, 299, 119);
 	glFlush();
 }
 
