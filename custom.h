@@ -17,6 +17,8 @@ void getPolygonPointsRest(GLfloat, GLfloat, const ColorRGB&, std::vector<WCPoint
 void translatePolygon(std::vector<WCPoint>&, GLfloat, GLfloat);
 void rotatePolygon(std::vector<WCPoint>, WCPoint, GLdouble);
 void scalePolygon(std::vector<WCPoint>, WCPoint, GLfloat, GLfloat);
+void csLineClip(WCPoint winMin, WCPoint winMax, WCPoint point_1, WCPoint point_2);
+
 
 struct WCPoint
 {

@@ -112,25 +112,34 @@ void displayCustom()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glColor3f(1.0, 0.0, 1.0);
+	glColor3f(0.3, 0.3, 0.3);
 	//BresenhamLine(50, 50, 410, 410);
 	//DDALine(10, 10, 210, 210);
 	//MPCircle(300, 200, 100);
 	//MPEllipse(100, 150, 300, 250);
-	glBegin(GL_POLYGON);
-	glVertex2f(200, 100);
-	glVertex2f(250, 50);
-	glVertex2f(150, 50);
+	//glBegin(GL_POLYGON);
+	//glVertex2f(200, 100);
+	//glVertex2f(250, 50);
+	//glVertex2f(150, 50);
+	//glEnd();
+	//glFlush();
+
+	//std::vector<WCPoint> vertList{ {200,100 },
+	//								{250, 50},
+	//								{150, 50} };
+
+	//scalePolygon(vertList, { 200, 75 }, 100, 100);
+	////translatePolygon(vertList, 200, 200);
+	//rotatePolygon(vertList, { 200, 75 }, 180);
+	glRecti(150, 100, 450, 400);
+	/*glColor3f(1.0, 0.0, 0.0);
+	glBegin(GL_LINE_STRIP);
+	glVertex2i(50, 200);
+	glVertex2i(375, 75);
 	glEnd();
-	glFlush();
-
-	std::vector<WCPoint> vertList{ {200,100 },
-									{250, 50},
-									{150, 50} };
-
-	scalePolygon(vertList, { 200, 75 }, 100, 100);
-	//translatePolygon(vertList, 200, 200);
-	rotatePolygon(vertList, { 200, 75 }, 180);
+	glFlush();*/
+	glColor3f(0.0, 1.0, 0.0);
+	csLineClip({ 150, 100 }, { 450, 400 }, { 100, 200 }, { 490, 200 });
 }
 
 void boundaryFillAssignment()

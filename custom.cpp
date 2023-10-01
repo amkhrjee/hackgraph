@@ -2,6 +2,9 @@
 #include<algorithm>
 #include "custom.h"
 #include<iostream>
+#include<bitset>
+#include<fmt/format.h>
+
 // The DDA Line Algorithm
 void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 {
@@ -325,4 +328,143 @@ void scalePolygon(std::vector<WCPoint> vertList, WCPoint fixedPoint, GLfloat sx,
 	}
 	glEnd();
 	glFlush();
+}
+
+std::bitset<4> encode(WCPoint point, WCPoint  winMin, WCPoint winMax)
+{
+	std::bitset<4> code{ 0b0000 };
+
+	if (point.x < winMin.x)
+		code.set(0);
+	if (point.x > winMax.x)
+		code.set(1);
+	if (point.y < winMin.y)
+		code.set(2);
+	if (point.y > winMax.y)
+		code.set(3);
+	return code;
+}
+
+WCPoint getClippedEndPoint(WCPoint point, WCPoint  winMin, WCPoint winMax, GLfloat slope, GLfloat intercept)
+{
+	using namespace std;
+	bitset<4> code{ encode(point, winMin, winMax) };
+	if (code == bitset<4>{0b0000})
+	{
+		return point;
+	}
+	else if (code == bitset<4>{ 0b1000 })
+	{
+		//  y = winMax.y
+		GLfloat x{ (winMax.y - intercept) / slope };
+		return { x, winMax.y };
+	}
+	else if (code == bitset<4> {0b0100})
+	{
+		// y = winMin.y
+		GLfloat x{ (winMin.y - intercept) / slope };
+		return { x, winMin.y };
+	}
+	else if (code == bitset<4>{ 0b0010 })
+	{
+		// x = winMax.x
+		GLfloat y{ slope * winMax.x + intercept };
+		return { winMax.x, y };
+	}
+	else if (code == bitset<4> {0b0001})
+	{
+		// x = winMin.x
+		GLfloat y{ slope * winMin.x + intercept };
+		return { winMin.x, y };
+	}
+	else if (code == bitset<4> {0b1001})
+	{
+		GLfloat x{ (winMax.y - intercept) / slope };
+		if (x <= winMax.x && x >= winMin.x)
+			return { x, winMax.y };
+		else
+		{
+			GLfloat y{ slope * winMin.x + intercept };
+			if (y <= winMax.y && y >= winMin.y)
+				return { winMin.x, y };
+		}
+	}
+	else if (code == bitset<4> {0b1010})
+	{
+		GLfloat x{ (winMax.y - intercept) / slope };
+		if (x <= winMax.x && x >= winMin.x)
+			return { x, winMax.y };
+		else
+		{
+			GLfloat y{ slope * winMax.x + intercept };
+			if (y <= winMax.y && y >= winMin.y)
+				return { winMax.x, y };
+		}
+	}
+	else if (code == bitset<4> {0b0101})
+	{
+		GLfloat x{ (winMin.y - intercept) / slope };
+		if (x <= winMax.x && x >= winMin.x)
+			return { x, winMin.y };
+		else
+		{
+			GLfloat y{ slope * winMin.x + intercept };
+			if (y <= winMax.y && y >= winMin.y)
+				return { winMin.x, y };
+		}
+	}
+	else if (code == bitset<4> {0b0110})
+	{
+		GLfloat x{ (winMin.y - intercept) / slope };
+		if (x <= winMax.x && x >= winMin.x)
+			return { x, winMin.y };
+		else
+		{
+			GLfloat y{ slope * winMax.x + intercept };
+			if (y <= winMax.y && y >= winMin.y)
+				return { winMax.x, y };
+		}
+	}
+}
+
+// Cohen Sutherland Line Clipping Algorithm
+void csLineClip(WCPoint winMin, WCPoint winMax, WCPoint point_1, WCPoint point_2)
+{
+	GLfloat slope{ (point_2.y - point_1.y) / (point_2.x - point_1.x) };
+	fmt::print("The slope is {}\n", slope, point_2.y, point_1.y, point_2.x, point_1.x);
+	GLfloat intercept{ point_1.y - (slope * point_1.x) };
+	fmt::print("The intercept is {}\n", intercept);
+
+
+	std::bitset<4> code_1{ encode(point_1, winMin, winMax) };
+	fmt::print("Code for ({}, {}): {}\n", point_1.x, point_1.y, code_1.to_string());
+	std::bitset<4> code_2{ encode(point_2, winMin, winMax) };
+
+	if (code_1 == std::bitset<4> {0b0000}&& code_2 == std::bitset<4> {0b0000})
+	{
+		fmt::print("Retaining entire line\n");
+		// retain line
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(point_1.x, point_1.y);
+		glVertex2f(point_2.x, point_2.y);
+		glEnd();
+		glFlush();
+	}
+	else if ((code_1 & code_2) != std::bitset<4> {0b0000})
+	{
+		// discard line
+		return;
+	}
+	else
+	{
+		fmt::print("Performing Clipping\n");
+		// perform line clipping
+		WCPoint clipped_point_1{ getClippedEndPoint(point_1, winMin, winMax, slope, intercept) };
+		WCPoint clipped_point_2{ getClippedEndPoint(point_2, winMin, winMax, slope, intercept) };
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(clipped_point_1.x, clipped_point_1.y);
+		glVertex2f(clipped_point_2.x, clipped_point_2.y);
+		glEnd();
+		glFlush();
+	}
 }
