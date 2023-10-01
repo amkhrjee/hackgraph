@@ -1,14 +1,27 @@
 #pragma once
 #include<glut.h>
 #include<algorithm>
+#include<vector>
+
+struct ColorRGB;
+struct WCPoint;
+
 void DDALine(GLint, GLint, GLint, GLint);
 void BresenhamLine(GLint, GLint, GLint, GLint);
 void MPCircle(GLint, GLint, GLint);
 void MPEllipse(GLint, GLint, GLint, GLint);
-struct ColorRGB;
 void BoundaryFill(const ColorRGB&, const ColorRGB&, GLint, GLint);
 void BoundaryFillRemaining(const ColorRGB&, const ColorRGB&, GLint, GLint);
+void getPolygonPoints(GLfloat, GLfloat, const ColorRGB&, std::vector<WCPoint>&);
+void getPolygonPointsRest(GLfloat, GLfloat, const ColorRGB&, std::vector<WCPoint>&);
+void translatePolygon(std::vector<WCPoint>&, GLfloat, GLfloat);
+void rotatePolygon(std::vector<WCPoint>, WCPoint, GLdouble);
+void scalePolygon(std::vector<WCPoint>, WCPoint, GLfloat, GLfloat);
 
+struct WCPoint
+{
+	GLfloat x, y;
+};
 class Point2D
 {
 private:

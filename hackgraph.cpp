@@ -116,8 +116,21 @@ void displayCustom()
 	//BresenhamLine(50, 50, 410, 410);
 	//DDALine(10, 10, 210, 210);
 	//MPCircle(300, 200, 100);
-	MPEllipse(100, 150, 300, 250);
+	//MPEllipse(100, 150, 300, 250);
+	glBegin(GL_POLYGON);
+	glVertex2f(200, 100);
+	glVertex2f(250, 50);
+	glVertex2f(150, 50);
+	glEnd();
 	glFlush();
+
+	std::vector<WCPoint> vertList{ {200,100 },
+									{250, 50},
+									{150, 50} };
+
+	scalePolygon(vertList, { 200, 75 }, 100, 100);
+	//translatePolygon(vertList, 200, 200);
+	rotatePolygon(vertList, { 200, 75 }, 180);
 }
 
 void boundaryFillAssignment()
@@ -148,6 +161,7 @@ void boundaryFillAssignment()
 	glEnd();
 	//Mouth
 	glRecti(250, 120, 350, 140);
+	glFlush();
 
 	// Performing Boundary Fill
 	ColorRGB boundaryColor{ 0.0, 1.0, 0.0 };
@@ -158,7 +172,7 @@ void boundaryFillAssignment()
 	BoundaryFill(fillColor, boundaryColor, 299, 180);
 	BoundaryFillRemaining(fillColor, boundaryColor, 300, 119);
 	BoundaryFill(fillColor, boundaryColor, 299, 119);
-	glFlush();
+
 }
 
 int main(int argc, char** argv)
@@ -167,14 +181,14 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(winWidth, winHeight);
-	glutCreateWindow("Line Chart");
+	glutCreateWindow("Experiments");
 	// Anti-aliasing
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	init();
-	glutDisplayFunc(boundaryFillAssignment);
+	glutDisplayFunc(displayCustom);
 	glutReshapeFunc([](GLint newWidth, GLint newHeight) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

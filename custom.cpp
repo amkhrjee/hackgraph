@@ -2,7 +2,6 @@
 #include<algorithm>
 #include "custom.h"
 #include<iostream>
-#include<thread>
 // The DDA Line Algorithm
 void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 {
@@ -178,7 +177,7 @@ void ellipsePlotPoints(GLint xc, GLint yc, GLint x, GLint y)
 
 void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLint x, GLint y)
 {
-	std::cout << "(" << x << ", " << y << ")" << '\n';
+	//std::cout << "(" << x << ", " << y << ")" << '\n';
 	if (x < 0 || y < 0 || x > 600 || y > 500)
 	{
 		return;
@@ -213,6 +212,7 @@ void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLin
 		glBegin(GL_POINTS);
 		glVertex2i(x, y);
 		glEnd();
+		glFlush();
 		BoundaryFill(fillColor, boundaryColor, x - 1, y);
 		//BoundaryFill(fillColor, boundaryColor, x + 1, y);
 		BoundaryFill(fillColor, boundaryColor, x, y - 1);
@@ -226,7 +226,7 @@ void BoundaryFill(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLin
 
 void BoundaryFillRemaining(const ColorRGB& fillColor, const ColorRGB& boundaryColor, GLint x, GLint y)
 {
-	std::cout << "Hello from 2" << '\n';
+	//std::cout << "Hello from 2" << '\n';
 	if (x < 0 || y < 0 || x > 600 || y > 500)
 	{
 		return;
@@ -261,12 +261,68 @@ void BoundaryFillRemaining(const ColorRGB& fillColor, const ColorRGB& boundaryCo
 		glBegin(GL_POINTS);
 		glVertex2i(x, y);
 		glEnd();
+		glFlush();
 		//BoundaryFill(fillColor, boundaryColor, x - 1, y);
 		BoundaryFillRemaining(fillColor, boundaryColor, x + 1, y);
 		BoundaryFillRemaining(fillColor, boundaryColor, x, y - 1);
 		BoundaryFillRemaining(fillColor, boundaryColor, x, y + 1);
+
 		delete[] pixel;
 		pixel = nullptr;
 		return;
 	}
+}
+
+void translatePolygon(std::vector<WCPoint>& vertList, GLfloat tx, GLfloat ty)
+{
+	for (auto& eachVert : vertList)
+	{
+		eachVert.x += tx;
+		eachVert.y += ty;
+	}
+	glBegin(GL_POLYGON);
+	for (auto& eachVert : vertList)
+	{
+		glVertex2f(eachVert.x, eachVert.y);
+	}
+	glEnd();
+	glFlush();
+}
+
+void rotatePolygon(std::vector<WCPoint> vertList, WCPoint pivot, GLdouble theta)
+{
+	std::vector<WCPoint> vertsRotate{};
+	for (auto& eachVert : vertList)
+	{
+		GLfloat xRotate = pivot.x + (eachVert.x - pivot.x) * cos(theta) - (eachVert.y - pivot.y) * sin(theta);
+		GLfloat yRotate = pivot.x + (eachVert.x - pivot.x) * sin(theta) + (eachVert.y - pivot.y) * cos(theta);
+		vertsRotate.push_back({ xRotate, yRotate });
+	}
+
+	glBegin(GL_POLYGON);
+	for (auto& eachVert : vertsRotate)
+	{
+		glVertex2f(eachVert.x, eachVert.y);
+	}
+	glEnd();
+	glFlush();
+}
+
+void scalePolygon(std::vector<WCPoint> vertList, WCPoint fixedPoint, GLfloat sx, GLfloat sy)
+{
+	std::vector<WCPoint> scaledVerts;
+
+	for (auto& eachVert : vertList)
+	{
+		GLfloat scaledX = eachVert.x * sx + fixedPoint.x * (1 - sx);
+		GLfloat scaledY = eachVert.y * sy + fixedPoint.y * (1 - sy);
+	}
+
+	glBegin(GL_POLYGON);
+	for (auto& eachVert : scaledVerts)
+	{
+		glVertex2f(eachVert.x, eachVert.y);
+	}
+	glEnd();
+	glFlush();
 }
