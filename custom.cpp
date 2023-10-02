@@ -1,9 +1,11 @@
 #include<glut.h>
-#include<algorithm>
-#include "custom.h"
-#include<iostream>
 #include<bitset>
+#include <string>
+#include<sstream>
+#include <fstream>
+#include<algorithm>
 #include<fmt/format.h>
+#include "custom.h"
 
 // The DDA Line Algorithm
 void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
@@ -17,7 +19,7 @@ void DDALine(GLint x0, GLint y0, GLint x1, GLint y1)
 
 	glBegin(GL_POINTS);
 	GLfloat x = x0, y = y0;
-	glVertex2i(x, y);
+	glVertex2f(x, y);
 	for (int k{ 0 }; k < steps; k++)
 	{
 		x += xIncrement;
@@ -107,8 +109,6 @@ void circPlotPoints(GLint xc, GLint yc, Point2D point)
 	glVertex2i(xc - point.getY(), yc - point.getX());
 	glEnd();
 }
-
-//inline GLint round(const float a) { return static_cast<GLint> (a + 0.5); }
 
 // Midpoint Ellipse Algorithm
 void MPEllipse(GLint rx, GLint ry, GLint xc, GLint yc)
@@ -342,6 +342,7 @@ std::bitset<4> encode(WCPoint point, WCPoint  winMin, WCPoint winMax)
 		code.set(2);
 	if (point.y > winMax.y)
 		code.set(3);
+
 	return code;
 }
 
@@ -425,6 +426,10 @@ WCPoint getClippedEndPoint(WCPoint point, WCPoint  winMin, WCPoint winMax, GLflo
 				return { winMax.x, y };
 		}
 	}
+	else
+	{
+		return point;
+	}
 }
 
 // Cohen Sutherland Line Clipping Algorithm
@@ -439,6 +444,7 @@ void csLineClip(WCPoint winMin, WCPoint winMax, WCPoint point_1, WCPoint point_2
 	std::bitset<4> code_1{ encode(point_1, winMin, winMax) };
 	fmt::print("Code for ({}, {}): {}\n", point_1.x, point_1.y, code_1.to_string());
 	std::bitset<4> code_2{ encode(point_2, winMin, winMax) };
+	fmt::print("Code for ({}, {}): {}\n", point_2.x, point_2.y, code_2.to_string());
 
 	if (code_1 == std::bitset<4> {0b0000}&& code_2 == std::bitset<4> {0b0000})
 	{
@@ -467,4 +473,139 @@ void csLineClip(WCPoint winMin, WCPoint winMax, WCPoint point_1, WCPoint point_2
 		glEnd();
 		glFlush();
 	}
+}
+
+void scatterPlot(std::string filename, WCPoint winMin, WCPoint winMax, int padding)
+{
+	std::vector<int> dates{};
+	std::vector<float> prices{};
+	std::string line;
+	std::ifstream data{ filename };
+	if (!data)
+	{
+		// Print an error and exit
+		fmt::print("Uh oh, data could not be opened for reading!\n");
+		return;
+	}
+	std::getline(data, line);
+
+	while (std::getline(data, line))
+	{
+		int date;
+		float price;
+		std::stringstream dataline{ line };
+		dataline >> date >> price;
+		dates.push_back(date);
+		prices.push_back(price);
+	}
+
+	// There is always 30 days
+	float dategap{ ((winMax.x - winMin.x) - 2 * padding) / 30 };
+	float pricegap{ ((winMax.y - winMin.y) - 2 * padding) / prices.size() };
+
+	glPointSize(4);
+	glBegin(GL_POINTS);
+	for (int k{ 0 }; k < dates.size(); k++)
+	{
+		glVertex2f(padding + k * dategap, prices.at(k));
+	}
+	glEnd();
+	glBegin(GL_LINE_STRIP);
+	glVertex2i(padding, padding);
+	glVertex2i(padding, winMax.y - padding);
+	glEnd();
+	glBegin(GL_LINE_STRIP);
+	glVertex2i(padding, padding);
+	glVertex2i(winMax.x - padding, padding);
+	glEnd();
+	for (int k{ 0 }; k < 30; k++)
+	{
+		glBegin(GL_LINE_STRIP);
+		glVertex2i(padding + k * dategap, padding);
+		glVertex2i(padding + k * dategap, padding - 10);
+		glEnd();
+	}
+	for (int k{ 0 }; k < prices.size(); k++)
+	{
+		glBegin(GL_LINE_STRIP);
+		glVertex2i(padding, padding + k * pricegap);
+		glVertex2i(padding - 10, padding + k * pricegap);
+		glEnd();
+	}
+
+	std::vector<int> xLabels{};
+	for (auto date : dates)
+	{
+		if (date <= 9)
+		{
+			xLabels.push_back(0);
+			xLabels.push_back(48 + date);
+		}
+		else
+		{
+			xLabels.push_back(48 + (date / 10));
+			xLabels.push_back(48 + (date % 10));
+		}
+	}
+
+	for (int k{ 0 }; k < prices.size(); k++)
+	{
+		glRasterPos2i(padding + k * dategap, padding - 20);
+		for (int j{ 0 }; j < 2; j++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, xLabels.at(2 * k + j));
+	}
+
+	std::vector<int> yLabelSteps{};
+	int yLabel{ 0 };
+	for (int k{ 0 }; k < prices.size(); k++)
+	{
+		yLabelSteps.push_back(yLabel);
+		fmt::print("Y Label Step: {}\n", yLabel);
+		yLabel += pricegap;
+	}
+
+	std::vector<int> yLabels{};
+	for (auto yLabelStep : yLabelSteps)
+	{
+		if (yLabelStep <= 9)
+		{
+			yLabels.push_back(0);
+			yLabels.push_back(0);
+			yLabels.push_back(48 + yLabelStep);
+		}
+		else if (yLabelStep > 9 && yLabelStep <= 99)
+		{
+			yLabels.push_back(0);
+			yLabels.push_back(48 + (yLabelStep / 10));
+			yLabels.push_back(48 + (yLabelStep % 10));
+		}
+		else
+		{
+			yLabels.push_back(48 + (yLabelStep / 100));
+			yLabelStep = yLabelStep % 100;
+			yLabels.push_back(48 + (yLabelStep / 10));
+			yLabels.push_back(48 + (yLabelStep % 10));
+		}
+	}
+	fmt::print("Ylabels size: {}", yLabels.size());
+	for (int k{ 0 }; k < yLabelSteps.size(); k++)
+	{
+		glRasterPos2i(padding - 40, (k * pricegap) + padding);
+		for (int j{ 0 }; j < 3; j++)
+		{
+			fmt::print("Ylabels Index: {}\n", 3 * k + j);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, yLabels.at((3 * k) + j));
+
+		}
+	}
+
+	std::vector<GLubyte> label{ 'R', 'e', 'l', 'i', 'a', 'n', 'c', 'e', ' ', 'S', 't', 'o', 'c', 'k', ' ', 'P', 'r', 'i', 'c', 'e', 's' };
+	glRasterPos2i(250, 450);
+
+	for (auto labelChar : label)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, labelChar);
+	}
+	glFlush();
+	return;
 }

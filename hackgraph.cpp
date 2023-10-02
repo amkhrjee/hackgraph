@@ -16,7 +16,6 @@ GLubyte label[]{ 'J', 'a', 'n', 'F', 'e', 'b', 'M', 'a', 'r',
 GLint dataValue[]{ 420, 342, 324, 310, 262, 185,
 					190, 196, 217, 240, 312, 438 };
 
-
 void init()
 {
 	glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -131,15 +130,16 @@ void displayCustom()
 	//scalePolygon(vertList, { 200, 75 }, 100, 100);
 	////translatePolygon(vertList, 200, 200);
 	//rotatePolygon(vertList, { 200, 75 }, 180);
-	glRecti(150, 100, 450, 400);
-	/*glColor3f(1.0, 0.0, 0.0);
+	/*glRecti(150, 100, 450, 400);
+	glColor3f(1.0, 0.0, 0.0);
 	glBegin(GL_LINE_STRIP);
 	glVertex2i(50, 200);
 	glVertex2i(375, 75);
 	glEnd();
-	glFlush();*/
+	glFlush();
 	glColor3f(0.0, 1.0, 0.0);
-	csLineClip({ 150, 100 }, { 450, 400 }, { 100, 200 }, { 490, 200 });
+	csLineClip({ 150, 100 }, { 450, 400 }, { 50, 200 }, { 375, 75 });*/
+	scatterPlot("data.txt", { 0,0 }, { 600, 500 }, 50);
 }
 
 void boundaryFillAssignment()
@@ -173,8 +173,8 @@ void boundaryFillAssignment()
 	glFlush();
 
 	// Performing Boundary Fill
-	ColorRGB boundaryColor{ 0.0, 1.0, 0.0 };
-	ColorRGB fillColor{ 0.6, 0.6, 0.6 };
+	ColorRGB boundaryColor{ 0.0f, 1.0f, 0.0f };
+	ColorRGB fillColor{ 0.6f, 0.6f, 0.6f };
 	BoundaryFillRemaining(fillColor, boundaryColor, 300, 250);
 	BoundaryFill(fillColor, boundaryColor, 299, 250);
 	BoundaryFillRemaining(fillColor, boundaryColor, 300, 180);
